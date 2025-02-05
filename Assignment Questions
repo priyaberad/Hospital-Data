@@ -1,0 +1,294 @@
+Q1. Display patient names recommending Dr.Simran.
+
+SELECT 
+    Patient_name
+FROM
+    Patients
+WHERE
+    Doctor_name = 'Dr.Simran'
+
+
+Q2. Display number of patients treated by the same doctor and in the same ward.
+
+SELECT 
+    Doctor_name, Ward_no, COUNT(Patient_ID)
+FROM
+    Patients
+GROUP BY Doctor_name , Ward_no
+
+ 
+Q3. Display the average fees taken by each Doctor.
+
+SELECT 
+    Doctor_name, ROUND(AVG(Fees), 0)
+FROM
+    Patients
+GROUP BY Doctor_name
+ORDER BY 2 DESC
+
+
+Q4. Which specialist has used the maximum number of injections on date ‘01-02-22’?
+
+with cte_injection_count as (
+select m.Date, d.Specialty, m.Injections as Total_Injection
+from Medicines m
+join Doctors d
+on d.Doctor_name=m.Doctor_name)
+select ic.Specialty, ic.Total_Injection
+from cte_injection_count ic
+where ic.date='01-02-22'
+order by 2 desc
+limit 2
+
+
+
+Q5. How many nurses were present on Wednesday with Dr.Rutuja? 
+
+SELECT 
+    SUM(w.Nurses), t.Doctor_name
+FROM
+    Ward w
+        JOIN
+    Timetable t ON t.Ward_no = w.Ward_no
+WHERE
+    t.Doctor_name = 'Dr.Rutuja'
+        AND t.Day = 'Wednesday'
+
+
+
+Q6. At what time is Dr.Rutuja available on Wednesday?
+
+SELECT 
+    Doctor_name, Time
+FROM
+    Timetable
+WHERE
+    Day = 'Wednesday'
+        AND Doctor_name = 'Dr.Rutuja'
+
+
+Q7. Count of patients with good condition treated by each doctor?
+
+SELECT 
+    Doctor_name, COUNT(Patient_ID)
+FROM
+    Patients
+WHERE
+    patinet_condition = 'good'
+GROUP BY 1
+
+
+Q8. Wards on which floor has used the minimum number of medicines on date ‘02-02-22’?
+
+With cte_medicine_count as (
+select w.Ward_no, m.Date, w.Floor, sum(m.Medicines) as Total_Medicine 
+from Ward w
+join Medicines m
+on w.Ward_no=m.Ward_no
+group by w.Ward_no, m.Date, w.Floor)
+
+SELECT 
+    Ward_no, Floor, Total_Medicine
+FROM
+    cte_medicine_count
+WHERE
+    date = '02-02-22'
+GROUP BY Ward_no , Floor
+ORDER BY 3
+LIMIT 1
+
+
+
+Q9. Display ward no. having minimum number of beds.
+
+SELECT 
+    Ward_no, SUM(Beds)
+FROM
+    Ward
+GROUP BY 1
+ORDER BY 2
+LIMIT 1
+
+
+Q10. Display total experience of doctors with specialty as ‘Cardiologist’. 
+
+SELECT 
+    Specialty, SUM(Experience)
+FROM
+    Doctors
+WHERE
+    Specialty = 'Cardiologist'
+
+
+
+Q11. Display Doctor names and their corresponding floors.
+
+SELECT 
+    m.Doctor_name, w.Floor
+FROM
+    Medicines m
+        JOIN
+    Ward w ON w.Ward_no = m.Ward_no
+
+
+Q12. Display average Number of beds on each floor.
+
+SELECT 
+    Floor, ROUND(AVG(Beds), 0)
+FROM
+    Ward
+GROUP BY 1
+
+
+
+Q13. Display Doctor names and their ward numbers from Patients and Timetable.
+
+SELECT DISTINCT
+    Doctor_name, Ward_no
+FROM
+    Patients 
+UNION SELECT DISTINCT
+    Doctor_name, Ward_no
+FROM
+    Timetable
+
+
+
+
+Q14. Display count of patients treated on each day. 
+
+SELECT 
+    Treatment_date, COUNT(Patient_ID)
+FROM
+    Patients
+GROUP BY 1
+ORDER BY 1
+
+
+
+Q15. Display count of patients from each condition type.
+
+SELECT 
+    patinet_condition, COUNT(Patient_ID)
+FROM
+    Patients
+GROUP BY 1
+ORDER BY 1
+
+
+
+
+Q16. Display the total number of injections and medicines used by each doctor for doctor having doctor id greater than 3?
+
+SELECT 
+    m.Doctor_name,
+    SUM(m.Injections) AS Total_Injection,
+    SUM(m.Medicines) AS Total_Medicine
+FROM
+    Medicines m
+        JOIN
+    Doctors d ON m.Doctor_name = d.Doctor_name
+WHERE
+    d.Doctor_ID > 3
+GROUP BY m.Doctor_name
+
+
+
+Q17. Display the medicines consumed on each day starting from most to least.
+
+SELECT 
+    Date, SUM(Medicines) AS Total_Medicine
+FROM
+    Medicines
+GROUP BY 1
+ORDER BY 2 DESC
+
+Q18. Which ward has treated the most number of patients who went in good condition?
+
+SELECT 
+    Ward_no, COUNT(Patient_ID)
+FROM
+    Patients
+WHERE
+    patinet_condition = 'good'
+GROUP BY 1
+ORDER BY 2 DESC
+
+Q19. Give the doctor specialities available at 10am. 
+
+SELECT 
+    d.Specialty, t.time
+FROM
+    Doctors d
+        JOIN
+    Timetable t ON d.Doctor_name = t.Doctor_name
+WHERE
+    t.Time = '10am'
+
+Output:-
+
+Q20. Display the number of nurses using more than 20 injections in each ward.
+
+SELECT 
+    m.Ward_no, w.Nurses, SUM(m.Injections) AS Total_Injections
+FROM
+    Medicines m
+        JOIN
+    Ward w ON m.Ward_no = w.Ward_no
+GROUP BY m.Ward_no , w.Nurses
+HAVING SUM(m.Injections) > 20;
+
+
+Q21. Display number of patients treated by doctors having more than 3 years of experience in each ward.
+
+SELECT 
+    p.Ward_no,
+    d.Doctor_name,
+    d.Experience,
+    COUNT(p.Patient_ID) AS Total_Patient
+FROM
+    Doctors d
+        JOIN
+    Patients p ON d.Doctor_name = p.Doctor_name
+WHERE
+    Experience > 3
+GROUP BY p.Ward_no , d.Doctor_name , d.Experience
+ORDER BY 3 DESC
+
+:-
+
+Q22. Display the contact nos. each patient should contact in case of further assistance.
+Output:-
+
+SELECT 
+    P.Patient_name, D.Doctor_name, D.Contact_No
+FROM
+    Patients P
+        JOIN
+    Doctors D ON P.Doctor_name = D.Doctor_name;
+
+
+Q23. How many doctors are available at each time of the day?
+
+SELECT 
+    Time, COUNT(Doctor_name) AS Total_Doctors_Available
+FROM
+    Timetable
+GROUP BY 1
+
+
+:-
+
+Q24. Display Doctor_ID and names treating patients having 's' as their initial.
+
+SELECT 
+    d.Doctor_ID, d.Doctor_name, p.Patient_name
+FROM
+    Doctors d
+        JOIN
+    Patients p ON d.Doctor_name = p.Doctor_name
+HAVING (LEFT(p.Patient_name, 1) = 's')
+ORDER BY 1
+
+
+
